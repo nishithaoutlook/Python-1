@@ -1,0 +1,30 @@
+# Python package
+# Create and test a Python package on multiple Python versions.
+# Add steps that analyze code, save the dist with the build record, publish to a PyPI-compatible index, and more:
+# https://docs.microsoft.com/azure/devops/pipelines/languages/python
+
+trigger:
+- main
+
+pool:
+  vmImage: ubuntu-latest
+
+
+steps:
+- task: UsePythonVersion@0
+  inputs:
+    versionSpec: '3.6'
+  displayName: 'Use Python 3.6'
+
+- script: |
+    python -m pip install --upgrade pip
+    python -m pip install --upgrade build setuptools twine
+    python -m build
+    pip install -r requirements.txt
+  displayName: 'Install dependencies'
+
+- task: TwineAuthenticate@1
+  inputs:
+    artifactFeed: raw-coding-example-feed
+- script: |
+   twine upload -r "raw-coding-example-feed" --config-file $(PYPIRC_PATH) dist/*
